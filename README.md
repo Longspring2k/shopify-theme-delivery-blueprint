@@ -1,49 +1,62 @@
 # Shopify Theme Delivery Blueprint
 
-An internal theme-engineering baseline defining section ownership, responsive image behavior, formatting checks and deliberate staging delivery.
+A dependency-free Node.js demonstration of a fail-closed staging release gate for theme artifacts. It binds synthetic check evidence to an exact SHA-256 manifest, applies through a revision compare-and-swap to one **unpublished** in-memory target, and verifies committed bytes by readback.
 
-**Technical showcase · Documentation only · Anonymized**
+**Technical showcase · Original runnable demo · Anonymized · No publishing**
 
-Shopify | Liquid | CSS | JavaScript | Shopify CLI | Theme Check | GitHub Actions
+## Quick start
 
-## Engineering problem
+Requires Node.js 20 or newer. There is no package install step.
 
-A reusable baseline should make normal theme work predictable without disguising reference code as a finished client deployment or silently publishing to production.
-
-## Implementation scope
-
-- Documented native theme architecture across sections, templates, snippets, assets and global configuration.
-- Implemented an editable hero section using responsive Shopify images with intrinsic dimensions and explicit loading behavior.
-- Defined formatting and Theme Check gates for code changes.
-- Added a manually triggered workflow targeting an unpublished theme.
-- Documented responsive, editor, accessibility and performance evidence expectations and approval boundaries for publishing.
-
-## Architecture at a glance
-
-The following is an illustrative technical flow, not a client screenshot or a deployment topology.
-
-```mermaid
-flowchart TD
-    N0["Theme change"]
-    N1["Formatting and Theme Check"]
-    N0 --> N1
-    N2["Manual staging dispatch"]
-    N1 --> N2
-    N3["Unpublished theme"]
-    N2 --> N3
-    N4["Separate release review"]
-    N3 --> N4
+```sh
+node --test
+node demo/run.mjs
 ```
 
-## Evidence and delivery boundary
+Representative output from the checked-in fixture:
 
-Implemented reference baseline, not a completed client launch.
+```text
+PREPARED  target=unpublished-demo-theme version=12 files=3 artifact=<12 hex>…
+           evidence=format:pass, theme-check-synthetic:pass (fixture evidence, not Shopify Theme Check)
+APPLIED   target=unpublished-demo-theme version=13 artifact=<same digest>…
+VERIFIED  exact_manifest=true version=13 artifact=<same digest>…
+NOT PUBLISHED: this demo has no live-target or network adapter.
+```
 
-The inspected baseline contains quality and staging workflow definitions. Browser end-to-end coverage is not claimed: the inspected end-to-end directory is a documented placeholder rather than a complete suite.
+The generated plan token is intentionally not printed.
 
-## Read more
+## What the mechanism guarantees
 
-- [Engineering decisions](docs/engineering.md)
-- [Scope and evidence boundaries](docs/scope.md)
+- Candidate paths are relative, confined to known theme roots and extensions, and reject traversal, backslashes, absolute paths, any `.git` segment, ASCII controls, secret-like names, duplicates and sparse arrays.
+- The canonical manifest sorts files by exact JavaScript string code-unit order (not locale collation), binds each path to its UTF-8 content hash, then hashes the complete ordered stream.
+- Both required checks must pass and reference that artifact hash. `theme-check-synthetic` is fixture evidence—not a claim that Shopify Theme Check ran.
+- A private registry, not mutable returned display data, is authoritative for prepared plans.
+- Apply repeats target identity, unpublished role and exact revision checks. Revision detects change-away/change-back ABA even if bytes return to their prior value.
+- The update is one in-memory compare-and-swap. Role, identity and revision preflight refusals retain the plan, but the token is consumed immediately before the write attempt. Once the adapter is invoked, any error requires readback/reconciliation and a fresh prepare; automatic replay is forbidden because the write may have committed before throwing.
+- Readback verifies target identity, unpublished role, exact incremented revision and final manifest. A mismatch or unreadable/malformed readback is reported as a post-write verification failure, with no rollback claim. The gate does not claim it can distinguish a definite pre-commit failure from an ambiguous commit outcome.
 
-> This repository describes verified implementation work at a technical level. Original source, identities, business data and visual assets are intentionally omitted. It is not an installable application or a claim that the original private implementation is open source.
+## Policy limits
+
+| Limit | Value |
+|---|---:|
+| Candidate files | 100 |
+| Combined UTF-8 content | 1,000,000 bytes |
+| Target adapters | one in-memory target per gate |
+| Allowed roots | `assets`, `config`, `layout`, `locales`, `sections`, `snippets`, `templates` |
+| Allowed extensions | `css`, `gif`, `json`, `js`, `jpg`, `jpeg`, `liquid`, `png`, `svg`, `webp` |
+
+Because input is pure objects and there is no filesystem adapter, symlinks and filesystem traversal are outside the executable surface. Traversal syntax is still rejected before hashing.
+
+## Code map
+
+- [`src/release-gate.mjs`](src/release-gate.mjs) — validation, digest, private plans, CAS and readback verification.
+- [`test/release-gate.test.mjs`](test/release-gate.test.mjs) — deterministic success and fail-closed tests.
+- [`demo/run.mjs`](demo/run.mjs) — prepared → applied → verified lifecycle with fresh synthetic files.
+- [`docs/engineering.md`](docs/engineering.md) — contracts, state flow, failure matrix, trust boundary and production responsibilities.
+- [`docs/scope.md`](docs/scope.md) — evidence and publication boundaries.
+
+## Deliberate exclusions
+
+There is no Shopify API, Shopify CLI, Theme Check, GitHub Actions, credential handling, filesystem packaging, database, multi-process coordination, rollback, or publish-to-live operation. The token is a capability held by a trusted harness; it is not authentication.
+
+This repository contains newly authored synthetic code and fixtures only. It does not redistribute an original theme, client assets, private implementation, identities, domains, logs or credentials.

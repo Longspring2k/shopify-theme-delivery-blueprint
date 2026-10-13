@@ -1,22 +1,25 @@
 # Scope and evidence boundaries
 
-## Documented state
+## Public executable scope
 
-Implemented reference baseline, not a completed client launch.
+This original dependency-free demo validates and freezes a synthetic theme candidate, conditionally replaces one unpublished in-memory target, and verifies exact manifest identity after the write. All fixture paths and contents were freshly authored; none comes from an original theme or client implementation.
 
 ## Evidence basis
 
-The inspected baseline contains quality and staging workflow definitions. Browser end-to-end coverage is not claimed: the inspected end-to-end directory is a documented placeholder rather than a complete suite.
+- **Retained private baseline evidence** informed the subject: theme structure, quality gates and deliberate staging delivery. It is not redistributed.
+- **Fresh public demo evidence** comes only from executing this repository. It proves in-memory behavior, not Shopify connectivity, a live deployment or another system's historical production state.
 
-The public narrative was prepared against retained implementation and verification artifacts. Those private references are not redistributed. Source inspection, recorded test results, staging observations and production deployment are different levels of evidence; none is silently substituted for another.
+`theme-check-synthetic` is labeled fixture evidence. It demonstrates artifact binding; Shopify Theme Check is not invoked.
 
-## Not claimed or distributed
+## Not implemented or claimed
 
-- This showcase contains no deployment workflow, credentials or original theme package.
-- The described workflow is manual staging delivery, not automatic production publishing.
+- No original source, assets, screenshots, datasets, names, domains, identifiers or credentials.
+- No Shopify API/CLI adapter, Theme Check runner, GitHub Actions workflow or network operation.
+- No filesystem adapter, symlink handling or package discovery. Pure object input removes those surfaces rather than solving them.
+- No authentication, multi-user authorization, durable database, distributed transaction or multi-process guarantee.
+- No automatic retry or rollback after a write attempt. Once the adapter is invoked, the plan is consumed whether the adapter throws before mutation, commits then throws, or readback fails identity/role/revision/content verification; reconcile and prepare again.
+- No production publishing. Live and unknown roles are refused; publish-to-live does not exist.
 
-## Public repository boundary
+## Review intent
 
-Only newly written technical documentation and illustrative diagrams are included. There are no original application source files, datasets, screenshots, deployment scripts, credentials or inherited Git history. No business-performance figures or customer endorsements are asserted.
-
-The repository is intended for technical review of the engineering approach. It makes no grant of rights to the original private implementation or third-party dependencies.
+The repository demonstrates validation, deterministic identity, evidence binding, private prepared-state authority, revision CAS, failure invariants and honest readback handling. Production integration remains outside scope.
